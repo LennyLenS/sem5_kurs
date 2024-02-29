@@ -17,11 +17,11 @@ var Workers map[int]*is.WorkerInfo
 
 var managerInfo *is.ManagerInfo
 var workersPool chan *is.WorkerInfo
-var deferClusterWorkerTaskPool chan ts.ClusterWorkerTask
+var deferWorkerTaskPool chan ts.WorkerTask
 
 func csolveproblem(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Запрос на решение от клиента")
-	result := taskhandler.Handler_csolveproblem(deferClusterWorkerTaskPool, r.Body)
+	result := taskhandler.Handler_csolveproblem(deferWorkerTaskPool, r.Body)
 	fmt.Println("Воркер решил задачу, отправка ответа клиенту")
 
 	w.Header().Set("Content-Type", "application/json")
@@ -53,7 +53,7 @@ func main() {
 		panic("<порт>")
 	}
 
-	managerInfo, workersPool, deferClusterWorkerTaskPool = mi.ManagerInit(args)
+	managerInfo, workersPool, deferWorkerTaskPool = mi.ManagerInit(args)
 
 	http.HandleFunc("/msolveproblem", csolveproblem)
 

@@ -6,15 +6,15 @@ import (
 	"manager/taskhandler"
 )
 
-func ManagerInit(args []string) (*is.ManagerInfo, chan *is.WorkerInfo, chan ts.ClusterWorkerTask) {
+func ManagerInit(args []string) (*is.ManagerInfo, chan *is.WorkerInfo, chan ts.WorkerTask) {
 	managerPort := args[1]
 	workersPool := make(chan *is.WorkerInfo, 50)
-	deferClusterWorkerTaskPool := make(chan ts.ClusterWorkerTask, 1000000)
+	deferWorkerTaskPool := make(chan ts.WorkerTask, 1000000)
 	managerInfo := &is.ManagerInfo{
 		Port:        managerPort,
 		WorkersList: &map[int]*is.WorkerInfo{},
 	}
-	go taskhandler.DeferTasksPoolHandler(deferClusterWorkerTaskPool, workersPool)
+	go taskhandler.DeferTasksPoolHandler(deferWorkerTaskPool, workersPool)
 
-	return managerInfo, workersPool, deferClusterWorkerTaskPool
+	return managerInfo, workersPool, deferWorkerTaskPool
 }

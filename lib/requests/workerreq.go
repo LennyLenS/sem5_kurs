@@ -5,7 +5,7 @@ import (
 	tr "lib/trees"
 )
 
-type ClusterWorkerReq struct {
+type WorkerReq struct {
 	Root   tr.ASTNode
 	Tables map[string]tb.Table
 }

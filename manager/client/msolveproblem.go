@@ -6,10 +6,10 @@ import (
 	rq "lib/requests"
 )
 
-func Handler_msolveproblem(clientData io.ReadCloser, freeClusterReq chan chan *is.ManagerInfo) []byte {
-	sendClusterChan := make(chan *is.ManagerInfo, 1)
-	freeClusterReq <- sendClusterChan
-	cluster := <-sendClusterChan
+func Handler_msolveproblem(clientData io.ReadCloser, freeManagerReq chan chan *is.ManagerInfo) []byte {
+	sendManagerChan := make(chan *is.ManagerInfo, 1)
+	freeManagerReq <- sendManagerChan
+	cluster := <-sendManagerChan
 
 	var answerToClient []byte
 	rq.SendRequest(cluster.Port, "csolveproblem", clientData, &answerToClient)

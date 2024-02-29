@@ -1,4 +1,4 @@
-package matrixes
+package tables
 
 type Table struct {
 	Info TableInfo

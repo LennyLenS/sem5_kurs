@@ -7,7 +7,7 @@ import (
 )
 
 func GenerateRandTable(m, k int) mt.Table {
-	newMatrix := mt.Table{
+	newTable := mt.Table{
 		Info: mt.TableInfo{
 			ColumnName: []string{"id", "sex"},
 			Rows:       m,
@@ -17,13 +17,13 @@ func GenerateRandTable(m, k int) mt.Table {
 	}
 
 	for i := range m {
-		newMatrix.Grid[i] = make([]string, 2)
-		newMatrix.Grid[i][0] = fmt.Sprint(i)
+		newTable.Grid[i] = make([]string, 2)
+		newTable.Grid[i][0] = fmt.Sprint(i)
 		if rand.Intn(2)%2 == 0 {
-			newMatrix.Grid[i][1] = "f"
+			newTable.Grid[i][1] = "f"
 		} else {
-			newMatrix.Grid[i][1] = "m"
+			newTable.Grid[i][1] = "m"
 		}
 	}
-	return newMatrix
+	return newTable
 }

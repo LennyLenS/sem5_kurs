@@ -8,11 +8,11 @@ import (
 	tr "lib/trees"
 )
 
-func DeferTasksPoolHandler(deferClusterWorkerTaskPool chan ts.ClusterWorkerTask, workersPool chan *is.WorkerInfo) {
+func DeferTasksPoolHandler(deferWorkerTaskPool chan ts.WorkerTask, workersPool chan *is.WorkerInfo) {
 	for {
-		deferTask := <-deferClusterWorkerTaskPool
+		deferTask := <-deferWorkerTaskPool
 		if !deferTask.CheckReady() {
-			deferClusterWorkerTaskPool <- deferTask
+			deferWorkerTaskPool <- deferTask
 			continue
 		}
 
