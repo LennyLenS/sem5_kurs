@@ -13,13 +13,11 @@ const (
 	n int = 4
 )
 
-func getFormedTask() rq.ClientReq {
-	expr := "b / a"
-	a := gn.GenerateRandTable(10, 50)
-	b := gn.GenerateRandTable(10, 50)
-	fmt.Println(a)
-	fmt.Println(b)
-	c := gn.GenerateRandTable(n, 50)
+func getTask() rq.ClientReq {
+	expr := "(a / b) * c"
+	a := gn.GenerateRandTable(2000, 50)
+	b := gn.GenerateRandTable(1000, 50)
+	c := gn.GenerateRandTable(20, 50)
 	d := gn.GenerateRandTable(m, 50)
 	e := gn.GenerateRandTable(m, 50)
 	f := gn.GenerateRandTable(n, 50)
@@ -41,7 +39,7 @@ func getFormedTask() rq.ClientReq {
 }
 
 func SendRequest(port string) {
-	Req := getFormedTask()
+	Req := getTask()
 	var Ans mt.Table
 	rq.SendRequest(port, "msolveproblem", Req, &Ans)
 	fmt.Println(Ans)

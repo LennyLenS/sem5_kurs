@@ -7,9 +7,6 @@
 			"path": "./manager"
 		},
 		{
-			"path": "./cluster"
-		},
-		{
 			"path": "./worker"
 		},
 		{
