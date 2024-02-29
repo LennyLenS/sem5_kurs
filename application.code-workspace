@@ -1,0 +1,27 @@
+{//clearCommitHistory
+	"folders": [
+		{
+			"path": "./client"
+		},
+		{
+			"path": "./manager"
+		},
+		{
+			"path": "./cluster"
+		},
+		{
+			"path": "./worker"
+		},
+		{
+			"path": "./lib"
+		},
+		{
+			"path": "./test"
+		},
+		{
+			"name": "pp",
+			"path": "."
+		}
+	],
+	"settings": {}
+}

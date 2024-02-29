@@ -1,0 +1,12 @@
+//clearCommitHistory
+go 1.22.0
+
+use (
+	.
+	./client
+	./cluster
+	./lib
+	./manager
+	./worker
+	./test
+)
