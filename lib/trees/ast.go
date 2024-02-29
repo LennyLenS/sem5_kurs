@@ -20,15 +20,17 @@ func (m *TableLeaf) GetTableInfo() tb.TableInfo {
 }
 
 type BinaryOp struct {
-	Op    token.Token
-	Left  ASTNode
-	Right ASTNode
+	Op     token.Token
+	Left   ASTNode
+	Right  ASTNode
+	Fields []string
 }
 
 func ParseExpr(expr string) ASTNode {
 	fset := token.NewFileSet()
 	defAst, _ := parser.ParseExprFrom(fset, "", expr, 0)
 	tree := parseGoAstWithoutSize(defAst)
+	ast.Print(fset, tree)
 	return tree
 }
 
@@ -54,68 +56,26 @@ func parseGoAstWithoutSize(n ast.Node) ASTNode {
 			TableName: x.Name,
 		}
 		return &newNode
+	case *ast.IndexListExpr:
+		fields := []string{}
+		for i := 0; i < len(x.Indices); i++ {
+			fields = append(fields, x.Indices[i].(*ast.Ident).Name)
+		}
+		left := parseGoAstWithoutSize(x.X)
+		newNode := BinaryOp{
+			Left:   left,
+			Fields: fields,
+		}
+		return &newNode
+	case *ast.IndexExpr:
+		fields := []string{}
+		fields = append(fields, x.Index.(*ast.Ident).Name)
+		left := parseGoAstWithoutSize(x.X)
+		newNode := BinaryOp{
+			Left:   left,
+			Fields: fields,
+		}
+		return &newNode
 	}
 	return nil
 }
-
-// func UpdateTreeStats(node ASTNode, data map[string]tb.Table) {
-// 	var dfs func(nd ASTNode)
-// 	dfs = func(nd ASTNode) {
-// 		switch x := nd.(type) {
-// 		case *BinaryOp:
-// 			dfs(x.Left)
-// 			dfs(x.Right)
-
-// 		case *TableLeaf:
-// 			x.Info = data[x.TableName].Info
-// 		}
-// 	}
-// 	dfs(node)
-// }
-
-// func GetLeafsNames(root ASTNode) map[string]bool {
-// 	answr := map[string]bool{}
-
-// 	var dfs func(nd ASTNode)
-// 	dfs = func(nd ASTNode) {
-// 		switch x := nd.(type) {
-// 		case *BinaryOp:
-// 			dfs(x.Left)
-// 			dfs(x.Right)
-
-// 		case *TableLeaf:
-// 			answr[x.TableName] = true
-// 		}
-// 	}
-// 	dfs(root)
-
-// 	return answr
-// }
-
-// func UpparseJson(tree json.RawMessage) ASTNode {
-// 	var dfs func(json.RawMessage) ASTNode
-// 	dfs = func(node json.RawMessage) ASTNode {
-// 		var x map[string]json.RawMessage
-// 		err := json.Unmarshal(node, &x)
-// 		if err != nil {
-// 			panic("ошибка при распарсе на воркере(в dfs)")
-// 		}
-
-// 		if _, isLeaf := x["TableName"]; isLeaf {
-// 			var newLeaf TableLeaf
-// 			json.Unmarshal(x["TableName"], &newLeaf.TableName)
-// 			json.Unmarshal(x["Info"], &newLeaf.Info)
-// 			return &newLeaf
-// 		} else {
-// 			left := dfs(x["Left"])
-// 			right := dfs(x["Left"])
-
-// 			var newBin BinaryOp
-// 			json.Unmarshal(x["Op"], &newBin.Op)
-// 			newBin.Left = left
-// 			newBin.Right = right
-// 			return &newBin
-// 		}
-// 	}
-// 	return dfs(tree)
-// }

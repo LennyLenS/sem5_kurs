@@ -16,8 +16,12 @@ type WorkerTask struct {
 
 func (task *WorkerTask) CheckReady() bool {
 	_, ok1 := task.CWR.Root.(*tr.BinaryOp).Left.(*tr.TableLeaf)
-	_, ok2 := task.CWR.Root.(*tr.BinaryOp).Right.(*tr.TableLeaf)
-	if ok1 && ok2 {
+	if ok1 && len(task.CWR.Root.(*tr.BinaryOp).Fields) == 0 {
+		_, ok2 := task.CWR.Root.(*tr.BinaryOp).Right.(*tr.TableLeaf)
+		if ok1 && ok2 {
+			return true
+		}
+	} else if ok1 {
 		return true
 	}
 	return false

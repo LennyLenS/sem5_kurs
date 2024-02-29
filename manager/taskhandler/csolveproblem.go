@@ -19,16 +19,30 @@ func Handler_csolveproblem(deferWorkerTaskPool chan ts.WorkerTask, reqData io.Re
 
 	tables := inputData.Tables
 	tree := tr.ParseExpr(inputData.Expr)
-	// fmt.Println(tree.(*tr.BinaryOp))
-
+	fmt.Println(tree)
 	lastName := ""
 	var lastAnalChannel chan bool
 	var dfs func(node tr.ASTNode, prevnode tr.ASTNode)
+	i := 0
 	dfs = func(node, prevnode tr.ASTNode) {
-		if x, ok := node.(*tr.BinaryOp); ok {
+		if x, ok := node.(*tr.BinaryOp); ok && len(node.(*tr.BinaryOp).Fields) == 0 {
+			i++
 			dfs(x.Left, node)
 			dfs(x.Right, node)
-			fmt.Println(x.Left)
+			newTask := ts.WorkerTask{
+				CWR:             rq.WorkerReq{Root: x, Tables: tables},
+				ParentNode:      prevnode,
+				ResultTableName: gr.GetRandString(100),
+				AllTables:       &tables,
+				AnalChannel:     make(chan bool, 1),
+			}
+			deferWorkerTaskPool <- newTask
+			lastName = newTask.ResultTableName
+			lastAnalChannel = newTask.AnalChannel
+		} else if x, ok := node.(*tr.BinaryOp); ok {
+			i++
+			dfs(x.Left, node)
+			fmt.Println("CSolver proj    ", i, x.Left)
 			newTask := ts.WorkerTask{
 				CWR:             rq.WorkerReq{Root: x, Tables: tables},
 				ParentNode:      prevnode,

@@ -1,18 +1,21 @@
 package operation
 
 import (
+	"fmt"
 	"go/token"
 	is "lib/infostructs"
 	tb "lib/table"
 	tr "lib/trees"
 	"math"
+	"slices"
 	"sync"
 )
 
 type BinaryOp1 struct {
-	Op    token.Token
-	Left  *tr.TableLeaf
-	Right *tr.TableLeaf
+	Op     token.Token
+	Left   *tr.TableLeaf
+	Right  *tr.TableLeaf
+	Fields []string
 }
 
 type Input struct {
@@ -25,6 +28,65 @@ const MinInterval = 1000
 type TableLimit struct {
 	Start int
 	End   int
+}
+
+func ProjGor(info TableLimit, t1 tb.Table, fields []string) tb.Table {
+	var result tb.Table
+	for i := info.Start; i <= info.End; i++ {
+		s := make([]string, 0)
+		for j := 0; j < t1.Info.Cols; j++ {
+			ind := slices.Index(fields, t1.Info.ColumnName[j])
+			if ind != -1 {
+				s = append(s, []string{t1.Grid[i][j]}...)
+			}
+		}
+		if len(s) != 0 {
+			result.Grid = append(result.Grid, [][]string{s}...)
+			result.Info.Rows++
+		}
+	}
+	result.Info.ColumnName = fields
+	result.Info.Cols = len(fields)
+	return result
+}
+
+func Proj(op Input, workerInfo *is.WorkerInfo) tb.Table {
+	table1 := op.Tables[op.Root.Left.TableName]
+	fmt.Println(table1)
+	fmt.Println(op.Root.Left.TableName)
+	resulting := make(map[int]tb.Table)
+	var result tb.Table
+	var quantityInterval int
+	currentInterval := table1.Info.Rows / workerInfo.Cores
+	currentInterval = max(MinInterval, currentInterval)
+	quantityInterval = int(math.Ceil(float64(table1.Info.Rows) / float64(currentInterval)))
+	var sliceTableInfo []TableLimit = make([]TableLimit, quantityInterval)
+
+	for i := 0; i < quantityInterval; i++ {
+		sliceTableInfo[i] = TableLimit{
+			Start: i * currentInterval,
+			End:   min((i+1)*currentInterval-1, table1.Info.Rows-1),
+		}
+	}
+
+	var wg sync.WaitGroup
+	for i := 0; i < quantityInterval; i++ {
+		wg.Add(1)
+		go func() {
+			resulting[i] = ProjGor(sliceTableInfo[i], table1, op.Root.Fields)
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+
+	result.Info.ColumnName = resulting[0].Info.ColumnName
+	result.Info.Cols = resulting[0].Info.Cols
+	for i := 0; i < quantityInterval; i++ {
+		result.Grid = append(result.Grid, resulting[i].Grid...)
+		result.Info.Rows += resulting[i].Info.Rows
+	}
+
+	return result
 }
 
 func SUM(op Input, workerInfo *is.WorkerInfo) tb.Table {
@@ -49,11 +111,11 @@ func MULGor(info TableLimit, t1 tb.Table, t2 tb.Table) tb.Table {
 			s = append(s, t1.Grid[i]...)
 			s = append(s, t2.Grid[k]...)
 			result.Grid = append(result.Grid, [][]string{s}...)
-			result.Info.ColumnName = append(t1.Info.ColumnName, t2.Info.ColumnName...)
-			result.Info.Cols = t1.Info.Cols + t2.Info.Cols
 			result.Info.Rows++
 		}
 	}
+	result.Info.ColumnName = append(t1.Info.ColumnName, t2.Info.ColumnName...)
+	result.Info.Cols = t1.Info.Cols + t2.Info.Cols
 	return result
 }
 
@@ -85,9 +147,9 @@ func MUL(op Input, workerInfo *is.WorkerInfo) tb.Table {
 	wg.Wait()
 
 	result.Info.ColumnName = resulting[0].Info.ColumnName
+	result.Info.Cols = resulting[0].Info.Cols
 	for i := 0; i < quantityInterval; i++ {
 		result.Grid = append(result.Grid, resulting[i].Grid...)
-		result.Info.Cols = resulting[i].Info.Cols
 		result.Info.Rows += resulting[i].Info.Rows
 	}
 
@@ -112,11 +174,11 @@ func QUOGor(info TableLimit, t1 tb.Table, t2 tb.Table) tb.Table {
 		}
 		if flag {
 			result.Grid = append(result.Grid, [][]string{t1.Grid[i]}...)
-			result.Info.ColumnName = t1.Info.ColumnName
-			result.Info.Cols = t1.Info.Cols
 			result.Info.Rows++
 		}
 	}
+	result.Info.ColumnName = t1.Info.ColumnName
+	result.Info.Cols = t1.Info.Cols
 	return result
 }
 
@@ -148,9 +210,9 @@ func QUO(op Input, workerInfo *is.WorkerInfo) tb.Table {
 	wg.Wait()
 
 	result.Info.ColumnName = table1.Info.ColumnName
+	result.Info.Cols = resulting[0].Info.Cols
 	for i := 0; i < quantityInterval; i++ {
 		result.Grid = append(result.Grid, resulting[i].Grid...)
-		result.Info.Cols = resulting[i].Info.Cols
 		result.Info.Rows += resulting[i].Info.Rows
 	}
 
@@ -180,6 +242,8 @@ func SUBGor(info TableLimit, t1 tb.Table, t2 tb.Table) tb.Table {
 			result.Info.Rows++
 		}
 	}
+	result.Info.ColumnName = t1.Info.ColumnName
+	result.Info.Cols = t1.Info.Cols
 	return result
 }
 
@@ -211,9 +275,9 @@ func SUB(op Input, workerInfo *is.WorkerInfo) tb.Table {
 	wg.Wait()
 
 	result.Info.ColumnName = table1.Info.ColumnName
+	result.Info.Cols = resulting[0].Info.Cols
 	for i := 0; i < quantityInterval; i++ {
 		result.Grid = append(result.Grid, resulting[i].Grid...)
-		result.Info.Cols = resulting[i].Info.Cols
 		result.Info.Rows += resulting[i].Info.Rows
 	}
 

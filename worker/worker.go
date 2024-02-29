@@ -4,6 +4,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"go/ast"
 	"go/token"
 	is "lib/infostructs"
 	rq "lib/requests"
@@ -22,19 +23,28 @@ func wsolveproblem(w http.ResponseWriter, r *http.Request) {
 	var op oper.Input
 	er := json.NewDecoder(r.Body).Decode(&op)
 	if er != nil {
-		panic("ошибка парсера")
+		panic("Ошибка парсера")
 	}
+	fset := token.NewFileSet()
+	ast.Print(fset, op.Root)
 	var newTable tb.Table
-	switch op.Root.Op {
-	case token.ADD:
-		newTable = oper.SUM(op, workerInfo)
-	case token.MUL:
-		newTable = oper.MUL(op, workerInfo)
-	case token.QUO:
-		newTable = oper.QUO(op, workerInfo)
-	case token.SUB:
-		newTable = oper.SUB(op, workerInfo)
+	if er == nil && len(op.Root.Fields) == 0 {
+		switch op.Root.Op {
+		case token.ADD:
+			newTable = oper.SUM(op, workerInfo)
+		case token.MUL:
+			newTable = oper.MUL(op, workerInfo)
+		case token.QUO:
+			newTable = oper.QUO(op, workerInfo)
+		case token.SUB:
+			newTable = oper.SUB(op, workerInfo)
+		}
+		fmt.Println(op.Root.Op)
+	} else {
+		fmt.Println(op.Root.Left.TableName)
+		newTable = oper.Proj(op, workerInfo)
 	}
+	// fmt.Println(newTable)
 	ansjs, _ := json.Marshal(newTable)
 
 	rq.SendRequest(workerInfo.ManagerPort, "cfreeworker", workerInfo.Id)

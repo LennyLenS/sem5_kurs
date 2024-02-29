@@ -27,3 +27,21 @@ func GenerateRandTable(m, k int) mt.Table {
 	}
 	return newTable
 }
+
+func GenerateRandTable2(m, k int) mt.Table {
+	newTable := mt.Table{
+		Info: mt.TableInfo{
+			ColumnName: []string{"name", "age"},
+			Rows:       m,
+			Cols:       2,
+		},
+		Grid: make([][]string, m),
+	}
+
+	for i := range m {
+		newTable.Grid[i] = make([]string, 2)
+		newTable.Grid[i][0] = GetRandString(1)
+		newTable.Grid[i][1] = fmt.Sprint((rand.Intn(k)))
+	}
+	return newTable
+}
