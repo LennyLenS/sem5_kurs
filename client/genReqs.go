@@ -14,8 +14,8 @@ const (
 )
 
 func getFormedTask() rq.ClientReq {
-	expr := "(b + a) * a"
-	a := gn.GenerateRandTable(2, 50)
+	expr := "b / a"
+	a := gn.GenerateRandTable(10, 50)
 	b := gn.GenerateRandTable(10, 50)
 	fmt.Println(a)
 	fmt.Println(b)

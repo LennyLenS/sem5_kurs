@@ -6,8 +6,8 @@ import (
 	rq "lib/requests"
 )
 
-func Handler_msolveproblem(clientData io.ReadCloser, freeClusterReq chan chan *is.ClusterInfo) []byte {
-	sendClusterChan := make(chan *is.ClusterInfo, 1)
+func Handler_msolveproblem(clientData io.ReadCloser, freeClusterReq chan chan *is.ManagerInfo) []byte {
+	sendClusterChan := make(chan *is.ManagerInfo, 1)
 	freeClusterReq <- sendClusterChan
 	cluster := <-sendClusterChan
 

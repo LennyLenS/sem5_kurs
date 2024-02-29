@@ -1,8 +1,6 @@
 package main
 
 import (
-	"go/ast"
-	"go/token"
 	tr "lib/trees"
 )
 

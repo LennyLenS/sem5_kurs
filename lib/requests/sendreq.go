@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"io"
+	"net/http"
 )
 
-func SendRequest(port string, pattern string, sendData interface{}, responseDataArr...interface{}) {
+func SendRequest(port string, pattern string, sendData interface{}, responseDataArr ...interface{}) {
 	sendDataCoded := sendData
 	if _, isReadyToSend := sendData.(io.Reader); !isReadyToSend {
 		jsonCoded, err := json.Marshal(sendData)
@@ -17,7 +17,7 @@ func SendRequest(port string, pattern string, sendData interface{}, responseData
 		}
 		sendDataCoded = bytes.NewReader(jsonCoded)
 	}
-	
+
 	response, err := http.Post(fmt.Sprintf("http://localhost:%s/%s", port, pattern), "application/json", sendDataCoded.(io.Reader))
 	if err != nil {
 		panic("Ошибка запроса!")
@@ -38,6 +38,6 @@ func SendRequest(port string, pattern string, sendData interface{}, responseData
 				panic("Ошибка распарса!")
 			}
 		}
-		
+
 	}
 }

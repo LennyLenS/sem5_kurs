@@ -2,14 +2,19 @@ package minit
 
 import (
 	is "lib/infostructs"
-	mc "manager/cluster"
+	ts "lib/tasks"
+	"manager/taskhandler"
 )
 
-func ManagerInit(args []string) (string, map[int]*is.ClusterInfo, chan chan *is.ClusterInfo, chan *is.ClusterInfo) {
+func ManagerInit(args []string) (*is.ManagerInfo, chan *is.WorkerInfo, chan ts.ClusterWorkerTask) {
 	managerPort := args[1]
-	clusters := map[int]*is.ClusterInfo{}
-	freeClusterReq := make(chan chan *is.ClusterInfo, 1000)
-	updateClusterReq := make(chan *is.ClusterInfo, 1000)
-	go mc.ClusterDataManager(&clusters, freeClusterReq, updateClusterReq)
-	return managerPort, clusters, freeClusterReq, updateClusterReq
+	workersPool := make(chan *is.WorkerInfo, 50)
+	deferClusterWorkerTaskPool := make(chan ts.ClusterWorkerTask, 1000000)
+	managerInfo := &is.ManagerInfo{
+		Port:        managerPort,
+		WorkersList: &map[int]*is.WorkerInfo{},
+	}
+	go taskhandler.DeferTasksPoolHandler(deferClusterWorkerTaskPool, workersPool)
+
+	return managerInfo, workersPool, deferClusterWorkerTaskPool
 }

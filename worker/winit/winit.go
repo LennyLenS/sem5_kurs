@@ -8,7 +8,7 @@ import (
 
 func WorkerInit(args []string) *is.WorkerInfo {
 	workerPort := args[1]
-	clusterPort := args[2]
+	managerPort := args[2]
 	id, err := strconv.Atoi(args[3])
 	if err != nil {
 		panic("Ошибка парса Id")
@@ -20,11 +20,11 @@ func WorkerInit(args []string) *is.WorkerInfo {
 
 	workerInfo := is.WorkerInfo{
 		Port:        workerPort,
-		ClusterPort: clusterPort,
+		ManagerPort: managerPort,
 		Id:          id,
 		Cores:       cores,
 	}
 
-	rq.SendRequest(workerInfo.ClusterPort, "caddworker", workerInfo)
+	rq.SendRequest(workerInfo.ManagerPort, "caddworker", workerInfo)
 	return &workerInfo
 }
