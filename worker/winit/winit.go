@@ -1,7 +1,7 @@
 package winit
 
 import (
-	is "lib/infostructs"
+	is "lib/info"
 	rq "lib/requests"
 	"strconv"
 )
@@ -25,6 +25,6 @@ func WorkerInit(args []string) *is.WorkerInfo {
 		Cores:       cores,
 	}
 
-	rq.SendRequest(workerInfo.ManagerPort, "caddworker", workerInfo)
+	rq.SendRequest(workerInfo.ManagerPort, "maddworker", workerInfo)
 	return &workerInfo
 }

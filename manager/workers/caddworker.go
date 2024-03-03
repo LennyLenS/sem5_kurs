@@ -3,16 +3,16 @@ package workers
 import (
 	"encoding/json"
 	"io"
-	is "lib/infostructs"
+	is "lib/info"
 )
 
-func Handler_caddworker(reqData io.ReadCloser, clusterInfo *is.ManagerInfo, workersPool chan *is.WorkerInfo) {
+func Handler_caddworker(reqData io.ReadCloser, managerInfo *is.ManagerInfo, workersPool chan *is.WorkerInfo) {
 	var newWorker is.WorkerInfo
 	err := json.NewDecoder(reqData).Decode(&newWorker)
 	if err != nil {
 		panic("Ошибка парса воркера на кластере caddworker")
 	}
 
-	(*clusterInfo.WorkersList)[newWorker.Id] = &newWorker
+	(*managerInfo.WorkersList)[newWorker.Id] = &newWorker
 	workersPool <- &newWorker
 }

@@ -1,7 +1,6 @@
 package trees
 
 import (
-	// "encoding/json"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -29,19 +28,19 @@ type BinaryOp struct {
 func ParseExpr(expr string) ASTNode {
 	fset := token.NewFileSet()
 	defAst, _ := parser.ParseExprFrom(fset, "", expr, 0)
-	tree := parseGoAstWithoutSize(defAst)
+	tree := parseAst(defAst)
 	ast.Print(fset, tree)
 	return tree
 }
 
-func parseGoAstWithoutSize(n ast.Node) ASTNode {
+func parseAst(n ast.Node) ASTNode {
 	switch x := n.(type) {
 	case *ast.ParenExpr:
-		return parseGoAstWithoutSize(x.X)
+		return parseAst(x.X)
 
 	case *ast.BinaryExpr:
-		left := parseGoAstWithoutSize(x.X)
-		right := parseGoAstWithoutSize(x.Y)
+		left := parseAst(x.X)
+		right := parseAst(x.Y)
 
 		newNode := BinaryOp{
 			Op:    x.Op,
@@ -61,7 +60,7 @@ func parseGoAstWithoutSize(n ast.Node) ASTNode {
 		for i := 0; i < len(x.Indices); i++ {
 			fields = append(fields, x.Indices[i].(*ast.Ident).Name)
 		}
-		left := parseGoAstWithoutSize(x.X)
+		left := parseAst(x.X)
 		newNode := BinaryOp{
 			Left:   left,
 			Fields: fields,
@@ -70,7 +69,7 @@ func parseGoAstWithoutSize(n ast.Node) ASTNode {
 	case *ast.IndexExpr:
 		fields := []string{}
 		fields = append(fields, x.Index.(*ast.Ident).Name)
-		left := parseGoAstWithoutSize(x.X)
+		left := parseAst(x.X)
 		newNode := BinaryOp{
 			Left:   left,
 			Fields: fields,

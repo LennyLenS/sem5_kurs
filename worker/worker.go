@@ -1,12 +1,10 @@
-// clearCommitHistory
 package main
 
 import (
 	"encoding/json"
 	"fmt"
-	"go/ast"
 	"go/token"
-	is "lib/infostructs"
+	is "lib/info"
 	rq "lib/requests"
 	tb "lib/table"
 	"net/http"
@@ -19,14 +17,12 @@ var workerInfo *is.WorkerInfo
 
 func wsolveproblem(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Запрос на решение от менеджера")
-	rq.SendRequest(workerInfo.ManagerPort, "cbusyworker", workerInfo.Id)
+	rq.SendRequest(workerInfo.ManagerPort, "mbusyworker", workerInfo.Id)
 	var op oper.Input
 	er := json.NewDecoder(r.Body).Decode(&op)
 	if er != nil {
 		panic("Ошибка парсера")
 	}
-	fset := token.NewFileSet()
-	ast.Print(fset, op.Root)
 	var newTable tb.Table
 	if er == nil && len(op.Root.Fields) == 0 {
 		switch op.Root.Op {
@@ -39,15 +35,12 @@ func wsolveproblem(w http.ResponseWriter, r *http.Request) {
 		case token.SUB:
 			newTable = oper.SUB(op, workerInfo)
 		}
-		fmt.Println(op.Root.Op)
 	} else {
-		fmt.Println(op.Root.Left.TableName)
 		newTable = oper.Proj(op, workerInfo)
 	}
-	// fmt.Println(newTable)
 	ansjs, _ := json.Marshal(newTable)
 
-	rq.SendRequest(workerInfo.ManagerPort, "cfreeworker", workerInfo.Id)
+	rq.SendRequest(workerInfo.ManagerPort, "mfreeworker", workerInfo.Id)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(ansjs)

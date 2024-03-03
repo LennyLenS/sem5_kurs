@@ -3,7 +3,7 @@ package main
 
 import (
 	"fmt"
-	is "lib/infostructs"
+	is "lib/info"
 	ts "lib/tasks"
 	mi "manager/minit"
 	"manager/taskhandler"
@@ -17,11 +17,11 @@ var Workers map[int]*is.WorkerInfo
 
 var managerInfo *is.ManagerInfo
 var workersPool chan *is.WorkerInfo
-var deferWorkerTaskPool chan ts.WorkerTask
+var workerTaskPool chan ts.WorkerTask
 
 func msolveproblem(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Запрос на решение от клиента")
-	result := taskhandler.Handler_csolveproblem(deferWorkerTaskPool, r.Body)
+	result := taskhandler.Handler_msolveproblem(workerTaskPool, r.Body)
 	fmt.Println("Воркер решил задачу, отправка ответа клиенту")
 
 	w.Header().Set("Content-Type", "application/json")
@@ -53,13 +53,12 @@ func main() {
 		panic("<порт>")
 	}
 
-	managerInfo, workersPool, deferWorkerTaskPool = mi.ManagerInit(args)
+	managerInfo, workersPool, workerTaskPool = mi.ManagerInit(args)
 
 	http.HandleFunc("/msolveproblem", msolveproblem)
-
-	http.HandleFunc("/caddworker", maddworker)
-	http.HandleFunc("/cfreeworker", mfreeworker)
-	http.HandleFunc("/cbusyworker", mbusyworker)
+	http.HandleFunc("/maddworker", maddworker)
+	http.HandleFunc("/mfreeworker", mfreeworker)
+	http.HandleFunc("/mbusyworker", mbusyworker)
 
 	http.ListenAndServe(fmt.Sprintf(":%s", managerInfo.Port), nil)
 }

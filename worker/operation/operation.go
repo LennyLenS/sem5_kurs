@@ -1,9 +1,8 @@
 package operation
 
 import (
-	"fmt"
 	"go/token"
-	is "lib/infostructs"
+	is "lib/info"
 	tb "lib/table"
 	tr "lib/trees"
 	"math"
@@ -52,8 +51,6 @@ func ProjGor(info TableLimit, t1 tb.Table, fields []string) tb.Table {
 
 func Proj(op Input, workerInfo *is.WorkerInfo) tb.Table {
 	table1 := op.Tables[op.Root.Left.TableName]
-	fmt.Println(table1)
-	fmt.Println(op.Root.Left.TableName)
 	resulting := make(map[int]tb.Table)
 	var result tb.Table
 	var quantityInterval int

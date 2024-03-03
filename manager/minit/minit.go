@@ -1,7 +1,7 @@
 package minit
 
 import (
-	is "lib/infostructs"
+	is "lib/info"
 	ts "lib/tasks"
 	"manager/taskhandler"
 )
@@ -9,12 +9,12 @@ import (
 func ManagerInit(args []string) (*is.ManagerInfo, chan *is.WorkerInfo, chan ts.WorkerTask) {
 	managerPort := args[1]
 	workersPool := make(chan *is.WorkerInfo, 50)
-	deferWorkerTaskPool := make(chan ts.WorkerTask, 1000000)
+	workerTaskPool := make(chan ts.WorkerTask, 1000000)
 	managerInfo := &is.ManagerInfo{
 		Port:        managerPort,
 		WorkersList: &map[int]*is.WorkerInfo{},
 	}
-	go taskhandler.DeferTasksPoolHandler(deferWorkerTaskPool, workersPool)
+	go taskhandler.TasksPool(workerTaskPool, workersPool)
 
-	return managerInfo, workersPool, deferWorkerTaskPool
+	return managerInfo, workersPool, workerTaskPool
 }

@@ -9,14 +9,14 @@ import (
 )
 
 const (
-	m int = 1000
+	m int = 10000
 	n int = 4
 )
 
 func getTask() rq.ClientReq {
-	expr := "(((a + b) / c) * ((d - e) / f))[id, name]"
-	a := gn.GenerateRandTable(100, 50)
-	b := gn.GenerateRandTable(1000, 50)
+	expr := "(a[id] / b[id])"
+	a := gn.GenerateRandTable(1000000, 50)
+	b := gn.GenerateRandTable(110, 50)
 	c := gn.GenerateRandTable(20, 50)
 	d := gn.GenerateRandTable2(m, 25)
 	e := gn.GenerateRandTable2(m, 25)

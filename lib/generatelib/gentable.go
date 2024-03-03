@@ -15,7 +15,6 @@ func GenerateRandTable(m, k int) mt.Table {
 		},
 		Grid: make([][]string, m),
 	}
-
 	for i := range m {
 		newTable.Grid[i] = make([]string, 2)
 		newTable.Grid[i][0] = fmt.Sprint(i)
